@@ -9,9 +9,13 @@ Welcome to the Super Mario Kart AI Hackathon! This guide will walk you through t
 
 **Docker:** A platform for running the C++ game engine without needing to install its dependencies.
 
+  Docker for Linux: https://docs.docker.com/desktop/setup/install/linux/
+
 **Step 1: Start the Game Server**
 
   Open your terminal and execute this command: docker run -p 8080:8080 -d mariokart-server:latest
+
+  **HÄR ÄR TANKEN ATT (mariokart-server:latest): är en public docker image som innehåller C++ spelet. Detta kommer ligga som open source på dockerhub så spelarna kan pulla direkt från det.**
 
 **Step 2: Set Up the Python Environment**
 
