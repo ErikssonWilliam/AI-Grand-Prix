@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 import asyncio
+import json
 import websockets
 import logging
 import sys
 import struct
 from enum import IntEnum
+from agent import Agent, GameState
+
+agent = Agent()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,6 +26,8 @@ class ActionCode(IntEnum):
     ATTACK = 0x08
     DEFEND = 0x09
     STATUS_UPDATE = 0x0A
+    SEND_OBSERVATION = 0x0B
+    START_GAME = 0x0C
     ERROR = 0xFF
 
 class MessageHandler:
@@ -33,33 +39,102 @@ class MessageHandler:
         return struct.pack('!B', action_code)
 
     @staticmethod
-    def decode_action(message: bytes) -> ActionCode:
-        (action_code,) = struct.unpack('!B', message[:1])
-        return ActionCode(action_code)
-
+    def decode_action(message: bytes) -> tuple[ActionCode, bytes]:
+        # C++ message format: [1 byte action] [2 bytes data_length (big-endian)] [data]
+        if len(message) < 3:
+            raise ValueError("Message too short to contain header (3 bytes required)")
+            
+        action_code, data_length = struct.unpack('!BH', message[:3])
+        
+        # Extract data part (optional)
+        data = message[3:3 + data_length]
+        
+        return ActionCode(action_code), data
 async def handle_client(websocket):
     client_address = websocket.remote_address
     logger.info(f"New client connected from {client_address}")
 
     try:
-        # Send welcome message
-        welcome_message = MessageHandler.encode_action(ActionCode.WELCOME)
+        # Send welcome message - FIXED: 3 bytes with length=0
+        welcome_message = struct.pack('!BH', ActionCode.WELCOME, 0)  # 3 bytes!
         await websocket.send(welcome_message)
-        logger.info(f"Sent welcome action to {client_address}")
+        logger.info(f"Sent WELCOME action to {client_address}")
+        
+        # Send START_GAME - CORRECT (already 3 bytes)
+        start_game_message = struct.pack('!BH', ActionCode.START_GAME, 0)
+        await websocket.send(start_game_message)
+        logger.info(f"Sent START_GAME action to {client_address}")
 
-        # Keep listening
+        # --- 2. RL Loop: Listen for Observations and Send Actions ---
         async for message in websocket:
-            logger.info(f"Received raw: {message}")
-
-            # If it's bytes, decode it
+            # The client is sending the full 3-byte header plus observation data
             if isinstance(message, bytes):
                 try:
-                    action = MessageHandler.decode_action(message)
-                    logger.info(f"Decoded action: {action.name}")
+                    action, data = MessageHandler.decode_action(message)
+                    logger.info(f"Decoded action: {action.name} (Data length: {len(data)})")
+                    
+                    if action == ActionCode.SEND_OBSERVATION:
+                        observation = data.decode('utf-8')
+                        logger.info(f"Observation received: {observation}")
+                        
+                        # TODO: This is where your RL Agent logic goes!
+                        # 1. Process the observation (e.g., parse JSON/string)
+                        # 2. Feed it to your RL model to get a new action
+                        # 3. Send the agent's chosen action back to the client
+                        
+                        # Example: Send a random action back (MOVE_UP)
+                        # action_to_send = struct.pack('!BH', ActionCode.MOVE_UP, 0)
+                        # await websocket.send(action_to_send)
+                        # logger.info(f"Sent MOVE_UP to {client_address}")
+                        try:
+                            obs_dict = json.loads(observation)  # Try JSON first
+                        except json.JSONDecodeError:
+                            # Fallback: parse simple "key:value, key:value" format
+                            obs_dict = {}
+                            for item in observation.split(','):
+                                if ':' in item:
+                                    key, value = item.split(':', 1)
+                                    key = key.strip()
+                                    value = value.strip()
+                                    # Convert to int if possible, otherwise keep as string
+                                    if value.isdigit():
+                                        value = int(value)
+                                    obs_dict[key] = value
+
+                        
+                        # 2. Ask the agent what to do¨
+                        state = GameState(**obs_dict)
+                        chosen_action = agent.act(state)  # returns 0-4
+                        
+                        # 3. Map to ActionCode (currently only accelerate / MOVE_UP)
+                        if chosen_action == 1:  # accelerate
+                            action_code = ActionCode.MOVE_UP
+                        elif chosen_action == 2:  # brake
+                            action_code = ActionCode.MOVE_DOWN
+                        elif chosen_action == 3:  # left
+                            action_code = ActionCode.MOVE_LEFT
+                        elif chosen_action == 4:  # right
+                            action_code = ActionCode.MOVE_RIGHT
+                        else:
+                            action_code = ActionCode.ECHO  # 0 = do nothing
+                        
+                        # 4. Send action back to client
+                        action_to_send = struct.pack('!BH', action_code, 0)
+                        await websocket.send(action_to_send)
+                        logger.info(f"Sent {action_code.name} to {client_address}")
+                        
+                    # Handle other messages (e.g., PING)
+                    elif action == ActionCode.PING:
+                        logger.info(f"Received PING from client.")
+
+                except ValueError as ve:
+                    logger.error(f"Message decode error from {client_address}: {ve}")
                 except Exception as e:
-                    logger.error(f"Failed to decode action: {e}")
+                    logger.error(f"Unhandled error in receive loop for {client_address}: {e}")
+                    import traceback
+                    traceback.print_exc()
             else:
-                logger.info(f"Received text message: {message}")
+                logger.warning(f"Received unexpected text message from {client_address}: {message}")
 
     except websockets.exceptions.ConnectionClosed:
         logger.info(f"Client {client_address} disconnected")

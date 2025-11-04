@@ -1,14 +1,14 @@
 # my_agent.py
 import numpy as np
+from typing import Optional
 from pydantic import BaseModel # Import this to define the state model
 
 # Define the exact same GameState model as in agent_server.py
 class GameState(BaseModel):
-    speed: float
-    dist_to_next: float
-    angle_to_next: float
-    off_track: bool
-    done: bool
+    GameFrame: int
+    PlayerHealth: int
+    angle_to_next: Optional[float] = 00
+    off_track: Optional[bool] = False
 
 # This is the class where the participants will put their logic.
 class Agent:
@@ -29,24 +29,5 @@ class Agent:
             An integer representing the chosen action.
             Actions: 0 = none, 1 = accelerate, 2 = brake, 3 = left, 4 = right
         """
-        # Example: a simple "smart" agent
-        if state.done:
-            return 0  # Stop if the race is over
 
-        # If we're off-track, slow down and correct
-        if state.off_track:
-            if state.angle_to_next < 0:
-                return 4  # Turn right
-            else:
-                return 3  # Turn left
-
-        # If we're far from the next checkpoint, accelerate
-        if state.dist_to_next > 20 and state.speed < 15:
-            return 1  # Accelerate
-            
-        # If we are aligned, keep accelerating
-        if abs(state.angle_to_next) < 0.1 and state.speed < 25:
-             return 1
-             
-        # Otherwise, take a random action for fun or exploration
-        return np.random.choice([0, 1, 2, 3, 4])
+        return 1 #Accelerate
