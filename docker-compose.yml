@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Python RL Server - participants develop here
+  python-server:
+    build: ./python-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./python-server/training_agents:/app/training_agents  # Live code editing
+    networks:
+      - hackathon-net
+
+  # Mario Kart Game Client - pre-built from Docker Hub
+  mario-kart-client:
+    image: william02erik/mario-kart-client:latest 
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=:0
+    depends_on:
+      - python-server
+    networks:
+      - hackathon-net
+
+networks:
+  hackathon-net:
