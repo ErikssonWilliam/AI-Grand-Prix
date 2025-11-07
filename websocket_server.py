@@ -8,7 +8,9 @@ import struct
 from enum import IntEnum
 from agent import Agent, GameState
 
-agent = Agent()
+# Initialize agent with training mode enabled
+# Set training_mode=False to only do inference (no training)
+agent = Agent(training_mode=True)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -50,6 +52,7 @@ class MessageHandler:
         data = message[3:3 + data_length]
         
         return ActionCode(action_code), data
+
 async def handle_client(websocket):
     client_address = websocket.remote_address
     logger.info(f"New client connected from {client_address}")
@@ -71,21 +74,16 @@ async def handle_client(websocket):
             if isinstance(message, bytes):
                 try:
                     action, data = MessageHandler.decode_action(message)
-                    logger.info(f"Decoded action: {action.name} (Data length: {len(data)})")
+                    #logger.info(f"Decoded action: {action.name} (Data length: {len(data)})")
                     
                     if action == ActionCode.SEND_OBSERVATION:
                         observation = data.decode('utf-8')
-                        logger.info(f"Observation received: {observation}")
+                        #logger.info(f"Observation received: {observation}")
                         
                         # TODO: This is where your RL Agent logic goes!
                         # 1. Process the observation (e.g., parse JSON/string)
                         # 2. Feed it to your RL model to get a new action
                         # 3. Send the agent's chosen action back to the client
-                        
-                        # Example: Send a random action back (MOVE_UP)
-                        # action_to_send = struct.pack('!BH', ActionCode.MOVE_UP, 0)
-                        # await websocket.send(action_to_send)
-                        # logger.info(f"Sent MOVE_UP to {client_address}")
                         try:
                             obs_dict = json.loads(observation)  # Try JSON first
                         except json.JSONDecodeError:
@@ -96,15 +94,22 @@ async def handle_client(websocket):
                                     key, value = item.split(':', 1)
                                     key = key.strip()
                                     value = value.strip()
-                                    # Convert to int if possible, otherwise keep as string
-                                    if value.isdigit():
-                                        value = int(value)
-                                    obs_dict[key] = value
+                                    # Try to convert to float, then int, otherwise keep as string
+                                    try:
+                                        float_val = float(value)
+                                        # Convert to int if it's a whole number
+                                        if float_val.is_integer():
+                                            obs_dict[key] = int(float_val)
+                                        else:
+                                            obs_dict[key] = float_val
+                                    except ValueError:
+                                        obs_dict[key] = value
 
-                        
-                        # 2. Ask the agent what to do¨
-                        state = GameState(**obs_dict)
-                        chosen_action = agent.act(state)  # returns 0-4
+                        print(obs_dict)
+                        # 2. Ask the agent what to do (collects experience if training)
+                        # Detect if episode is done (add this based on your game state if available)
+                        done = False  # TODO: Set this based on observation if available
+                        chosen_action = agent.collect_step(obs_dict, done=done)  # returns 0-4, collects experience
                         
                         # 3. Map to ActionCode (currently only accelerate / MOVE_UP)
                         if chosen_action == 1:  # accelerate
