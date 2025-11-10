@@ -16,4 +16,4 @@ COPY training_agents/ ./training_agents/
 
 ENV DISPLAY=:0
 
-CMD ["python", "server.py"]
+CMD ["python", "websocket_server.py"]
