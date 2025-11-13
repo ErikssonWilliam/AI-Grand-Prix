@@ -82,11 +82,11 @@ cd AI-Grand-Prix
 ### Step 2: Setup a python virtual environment
 1. Create the environment
 ```bash
-python3 -m venv venv
+python3 -m venv .venv
 ```
 2. Activate the environment
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 ```
 Your terminal prompt should now show (venv) at the beginning
 
