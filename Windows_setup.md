@@ -48,5 +48,61 @@
    - Press `Windows Key + R`, type `cmd`, press Enter
    - In the black window, type: `code --version`
    - You should see something like `1.80.0`
+  
+### Step 5: Install VcXsrv (X Server for Windows)
+
+1. Download VcXsrv from [sourceforge.net/projects/vcxsrv/](https://sourceforge.net/projects/vcxsrv/)
+2. Run the installer and follow the setup wizard
+3. After installation, launch "XLaunch" from Start Menu
+4. Use these settings:
+   - "Multiple windows"
+   - Start no client
+   - Check "Disable access control"
+   - Finish
+  
+# Running the game
+
+## Running the Game (Linux)
+
+### Step 1: Fork and Clone the Repository
+
+1. Go to the [AI Grand Prix repository](https://github.com/ErikssonWilliam/AI-Grand-Prix)
+2. Click the "Fork" button in the top-right corner to create your own copy
+3. Open terminal and clone your forked repository, replace YourUsername with the actual name:
+```bash
+git clone https://github.com/YourUsername/AI-Grand-Prix.git
+cd AI-Grand-Prix
+```
+
+### Step 2: Setup a python virtual environment
+1. Create the environment
+```bash
+python3 -m venv .venv
+```
+2. Activate the environment
+```bash
+.venv\Scripts\activate
+```
+Your terminal prompt should now show (venv) at the beginning
+
+3. Move into the python-server folder
+```bash
+cd python-server
+```
+4. Install correct python packages
+```bash
+pip install -r requirements.txt
+```
+
+5. Move out to the root again
+```bash
+cd ..
+```
+
+### Step 3: Run the game
+
+```bash
+setup.bat
+```
 
 [← Back to Main README](README.md)
