@@ -4,9 +4,12 @@ Welcome to the Super Mario Kart AI Hackathon! This guide will walk you through t
 
 ## Prerequisites
 
-**Python:** The programming language you'll be using to write your AI.  
+**Python:** The programming language you'll be using to write your AI.
+
 **Docker:** A platform for running the super mario game engine without needing to install its dependencies.  
+
 **VSCode (or other code editor):** The code editor you'll use to write and edit your Python code.  
+
 **Git:** Version control tool you'll use to download the hackaton code and save your changes.
 
 ## Setup Instructions
