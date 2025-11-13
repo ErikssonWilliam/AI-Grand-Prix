@@ -17,6 +17,8 @@ Welcome to the Super Mario Kart AI Hackathon! This guide will walk you through t
 
 **Python:** The programming language you'll be using to write your AI.
 **Docker:** A platform for running the super mario game engine without needing to install its dependencies.
+**VSCode (or other code editor):** The code editor you'll use to write and edit your Python code.
+**Git:** Version control tool you'll use to download the hackaton code and save your changes.
 
 ## Step 1: Install Python
 
@@ -56,8 +58,36 @@ You shall now see version numbers for both.
 
 ## Step 2: Install Docker
 
-  Docker for Linux: https://docs.docker.com/desktop/setup/install/linux/
+### Windows
+1. Download Docker Desktop from [docker.com](https://www.docker.com/products/docker-desktop/)
+2. Run the downloaded `Docker Desktop Installer.exe` file
+3. Follow the installation wizard with default settings
+4. When prompted, ensure "Use WSL 2 instead of Hyper-V" is selected (recommended)
+5. Restart your computer when installation completes
+6. **Verify it worked**:
+   - Open Command Prompt or PowerShell
+   - Type: `docker --version`
+   - You should see something like `Docker version 24.0.0`
 
+### Mac
+1. Download Docker Desktop from [docker.com](https://www.docker.com/products/docker-desktop/)
+2. Double-click the downloaded `.dmg` file
+3. Drag the Docker icon to your Applications folder
+4. Open Docker from your Applications folder
+5. Follow the setup instructions and grant necessary permissions
+6. **Verify it worked**:
+   - Open Terminal
+   - Type: `docker --version`
+   - You should see the Docker version number
+
+### Linux (Debian/Ubuntu)
+1. Open terminal and run these commands:
+```bash
+sudo apt update
+sudo apt install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USE
 # Linux Setup
 
 **Step 1: Start the Game Server**
