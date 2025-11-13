@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  python-server:
+    build: ./python-server
+    ports: ["8080:8080"]
+    volumes: ["./python-server/training_agents:/app/training_agents"]
+    networks: ["hackathon-net"]
+
+  mario-kart-client:
+    build: .
+    volumes: ["/tmp/.X11-unix:/tmp/.X11-unix:rw"]
+    environment: ["DISPLAY=host.docker.internal:0"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: ["python-server"]
+    networks: ["hackathon-net"]
+
+networks:
+  hackathon-net:
