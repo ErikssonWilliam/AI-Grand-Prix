@@ -2,6 +2,10 @@
 
 ## Step 1: Install Python
 
+1. **Install WSL** (Windows Subsystem for Linux):
+   ```powershell
+   wsl --install
+    ```
 1. Download Python 3.8 or newer from [python.org](https://www.python.org/downloads/)
 2. Click on "download python" and run the downloaded file (it will be called something like `python-3.11.0.exe`)
 3. **Important**: Check the box "Add Python to PATH" at the bottom of the first screen
