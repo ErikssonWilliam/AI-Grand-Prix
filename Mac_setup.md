@@ -60,3 +60,5 @@ brew install git
    code --version
    ```
   You shall now see a version number.
+
+# LÄGG TILL HÄR NÄR VI TESTAT OM MAC SETUP FUNGERAR SOM TÄNKT
