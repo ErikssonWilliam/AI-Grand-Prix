@@ -11,12 +11,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo "macOS detected - using XQuartz"
     export DISPLAY=host.docker.internal:0
-    DOCKER_COMPOSE_FILE="docker-compose.mac.yml"
-    
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    echo "Windows detected - using VcXsrv" 
-    export DISPLAY=host.docker.internal:0
-    DOCKER_COMPOSE_FILE="docker-compose.windows.yml"
+    DOCKER_COMPOSE_FILE="docker-compose.mac.yml" 
     
 else
     echo "Unsupported platform: $OSTYPE"
