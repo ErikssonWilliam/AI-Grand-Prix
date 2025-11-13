@@ -107,6 +107,6 @@ cd ..
 ### Step 3: Run the game
 
 ```bash
-#chmod +x setup.sh
-#./setup.sh
+chmod +x setup.sh
+./setup.sh
 ```
